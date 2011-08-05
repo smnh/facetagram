@@ -4,7 +4,7 @@
 		
         facetagram.api = (function (instagramToken, faceToken) {
                 var instagramApiUrl = "https://api.instagram.com/v1/media/search?client_id=" + instagramToken;
-                var location;
+                var location = "";
 
                 return {
                     get: _get
