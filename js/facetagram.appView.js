@@ -79,7 +79,7 @@ facetagram = window.facetagram || {};
 				
 				// Check if iScroll already initiated on current scroller element
 				if (!$scroller.data("scroller")) {
-					scroller = new iScroll($scroller.get(0), {
+					scroller = new iScroll($wrapper.get(0), {
 						"desktopCompatibility": true,
 						"checkDOMChanges": false
 					});
