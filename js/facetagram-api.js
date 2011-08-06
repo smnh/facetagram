@@ -155,7 +155,7 @@ var InstagramApi = (function(apiKey){
                     
                     var ts = Math.round(new Date().getTime() / 1000);
                     ts=ts-(((86400)*1000));
-                    _makeRequest(location_images.replace("{0}", locationId), /*{min_timestamp : -ts*100}*/null, 
+                    _makeRequest(location_images.replace("{0}", locationId), {min_timestamp : ts}, 
                         function(data){
                             callback.call(scope, data.data);
                             getLocationImages(locationData, ++index, callback, scope);
