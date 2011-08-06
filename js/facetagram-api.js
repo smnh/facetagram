@@ -244,19 +244,19 @@ facetagram.api = (function(){
 
 facetagram.ImageRepository = (function(){
     
-    var _locations = [{coords:{latitude:32.066157, longitude:34.777821}}, //tel-aviv
-        {coords:{latitude:32.8155556, longitude:34.9891667}}, //haifa
-        {coords:{latitude:32.068423, longitude:34.824787}}, //ramat gan
-        {coords:{latitude:32.0431, longitude:34.7722}}, //holon
-        {coords:{latitude:37.775, longitude:-122.4183333}}, //san francisco
-        {coords:{latitude:34.0522222, longitude:-118.2427778}}, //los angeles
-        {coords:{latitude:40.7141667, longitude:-74.0063889}}, //new york
-        {coords:{latitude:48.856614, longitude:2.352222}}, //paris
-        {coords:{latitude:22.396428, longitude:114.109497}}, //hong kong
-        {coords:{latitude:35.689488, longitude:139.691706}}, //tokio
-        {coords:{latitude:55.755786, longitude:37.617633}}, //moscow
-        {coords:{latitude:51.500152, longitude:-0.126236}} //london
-    ];
+    var _locations = [];//[{coords:{latitude:32.066157, longitude:34.777821}}, //tel-aviv
+//        {coords:{latitude:32.8155556, longitude:34.9891667}}, //haifa
+//        {coords:{latitude:32.068423, longitude:34.824787}}, //ramat gan
+//        {coords:{latitude:32.0431, longitude:34.7722}}, //holon
+//        {coords:{latitude:37.775, longitude:-122.4183333}}, //san francisco
+//        {coords:{latitude:34.0522222, longitude:-118.2427778}}, //los angeles
+//        {coords:{latitude:40.7141667, longitude:-74.0063889}}, //new york
+//        {coords:{latitude:48.856614, longitude:2.352222}}, //paris
+//        {coords:{latitude:22.396428, longitude:114.109497}}, //hong kong
+//        {coords:{latitude:35.689488, longitude:139.691706}}, //tokio
+//        {coords:{latitude:55.755786, longitude:37.617633}}, //moscow
+//        {coords:{latitude:51.500152, longitude:-0.126236}} //london
+//    ];
     
     var _images = [];
     var _listeners = [];

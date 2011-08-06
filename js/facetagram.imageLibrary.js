@@ -7,18 +7,22 @@ facetagram = window.facetagram || {};
 		var self = this;
 		
 		this.appView = options.appView;
-		this.element = options.appView.$pageWrapper.get(0);
 		this.lastImageIndex = 0;
-		this.$imageGallery = $('<div class="imageGallery page"><div class="wrapper"></div></div>');
+		this.loading = true;
+		this.$page = $('<div class="page">' + ns.utils.loadingIndicatorDiv + '</div>');
+		this.$wrapper = $('<div class="wrapper"></div>');
 		this.$scroller = $('<div class="scroller"></div>');
+		this.$imageGallery = $('<div class="imageGallery"></div>');
 		
-		this.$imageGallery.find('.wrapper').append(this.$scroller);
-		$(this.element).append(this.$imageGallery);
+		this.$scroller.append(this.$imageGallery);
+		this.$wrapper.append(this.$scroller);
 		
-		this.$imageGallery.show();
+		this.appView.$pageWrapper.append(this.$page);
+
+		this.$page.show();
 		
         ns.ImageRepository.subscribe(function(images){
-            
+			
             self.showImages(images);
             self.lastImageIndex = images.length;
 
@@ -33,16 +37,22 @@ facetagram = window.facetagram || {};
 				thumbnailData,
 				$imageWrapper;
 			
+			if (this.loading) {
+				this.loading = false;
+				this.$page.empty();
+				this.$page.append(this.$wrapper);
+			}
+			
 			if (images && images.length) {
 				for (i = this.lastImageIndex; i < images.length; i++) {
                     if (images[i].hasFace()) {
 					    thumbnailData = images[i].getThumbnail();
 					    $imageWrapper = $('<div class="imageWrapper"><img src="' + thumbnailData.url + '" /></div>');
-					    this.$scroller.append($imageWrapper);
+					    this.$imageGallery.append($imageWrapper);
                     }
 				}
 				
-				this.appView.refreshIScroll(this.$imageGallery);
+				this.appView.refreshIScroll(this.$page);
 			}
 		}
 	};

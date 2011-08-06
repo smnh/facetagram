@@ -2,7 +2,9 @@ facetagram = window.facetagram || {};
 
 (function(ns) {
 	
-	var AppView = function() {
+	var AppView, Footer;
+	
+	AppView = function() {
 		
 		var self = this;
 		
@@ -17,13 +19,7 @@ facetagram = window.facetagram || {};
 		});
 		
 		this.currentPage = null;
-		
-		$("body").html(
-			'<div id="header" class="header"></div>' +
-			'<div id="pageWrapper"></div>' +
-			'<div id="footer"></div>' +
-			'<div id="uiBlocker"></div>'
-		);
+		this.footer = new Footer();
 		
 		this.$pageWrapper = $("#pageWrapper");
 		this.$uiBlocker = $("#uiBlocker");
@@ -98,5 +94,89 @@ facetagram = window.facetagram || {};
 	};
 	
 	ns.AppView = AppView;
+	
+	Footer = function() {
+		var prop, menuItem, self = this;
+		
+		this.menuItems = {
+			"group": {
+				defaultMenuItem: "groupAndSingle",
+				submenu: {
+					"groupAndSingle": {
+						
+					}
+				}
+			},
+			"gender": {
+				defaultMenuItem: "genderBoth",
+				submenu: {
+					"males": {
+						
+					},
+					"females": {
+						
+					},
+					"genderBoth": {
+						
+					}
+				}
+			},
+			"mood": {
+				defaultMenuItem: "moodAll",
+				submenu: {
+					"moodAll": {
+						
+					}
+				}
+			},
+			"location": {},
+			"time": {}
+		};
+		
+		this.$footer = $("#footer");
+		this.$footerMenu = $("#footerMenu");
+		
+		for (prop in this.menuItems) {
+			if (this.menuItems[prop].submenu) {
+				menuItemId = this.menuItems[prop].defaultMenuItem;
+				menuItem = this.menuItems[prop].submenu[menuItemId];
+			} else {
+				menuItemId = prop;
+				menuItem = this.menuItems[prop];
+			}
+			
+			menuItem.$element = $('<div class="footerMenuItem"><div class="icon ' + menuItemId + '"></div></div>');
+			
+			if (this.menuItems[prop].submenu) {
+				(function(menuItem) {
+					menuItem.$element.bindImmediateClick(function(event) {
+						var $drawler = $('<div class="subMenuDrawler"></div>');
+						
+						$drawler.css({
+							"left": menuItem.$element.offset().left,
+							"width": (menuItem.$element.width() - 4) + "px",
+						});
+						
+						function removeDrawler() {
+							document.removeEventListener(ns.utils.START_EVENT, removeDrawler, false);
+							$drawler.remove();
+						}
+						
+						document.addEventListener(ns.utils.START_EVENT, removeDrawler, false)
+						
+						self.$footer.append($drawler);
+					});
+				})(menuItem);
+			}
+			
+			this.$footerMenu.append(menuItem.$element);
+		}
+	};
+	
+	Footer.prototype = {
+		constructor: Footer
+	};
+	
+	ns.Footer = Footer;
 	
 })(facetagram);
