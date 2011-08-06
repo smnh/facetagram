@@ -166,10 +166,10 @@ facetagram.api = (function(){
                 map[images[i].images.standard_resolution.url] = images[i];
             }
             
-            _makeFaceRequest(urls, map, _callback, _scope, []);
+            _makeFaceRequest(urls, map, _callback, _scope)
             return;
 
-            function _makeFaceRequest(urls, map, callback, scope, images)
+            function _makeFaceRequest(urls, map, callback, scope)
             {
                 if (urls.length)
                 {
@@ -186,16 +186,17 @@ facetagram.api = (function(){
                         FaceClientAPI.faces_detect(partial, function(url, data){
                             if (data.status == "success")
                             {
+                                var images = [];
                                 for (var i=0,len=data.photos.length ; i<len ; i++)
                                     images.push(new facetagram.Image(map[data.photos[i].url], data.photos[i]));
+
+                                callback.call(scope, images);
                             }
-                            _makeFaceRequest(urls, map, callback, scope, images);
+                            _makeFaceRequest(urls, map, callback, scope);
                         });
 
                     })(partial);
                 }
-                else
-                    callback.call(scope, images);
             };
 
         }
