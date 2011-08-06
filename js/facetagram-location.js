@@ -58,16 +58,17 @@ facetagram.locationHelper = (function(){
     function _callListeners()
     {
         var listener;
-        if (_state === _states.SUCCESS)
+        if (_state === _states.SUCCESS || _state === _states.FAILURE)
         {
             while (listener = _listeners.shift())
-                listener.callback.call(listener.scope, _location);
+                listener.callback.call(listener.scope, _location, _state);
         }
     };
 
     function _error()
     {
         _state = _states.FAILURE;
+        _callListeners();
     };
 
     function _success(pos)
