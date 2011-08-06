@@ -7,64 +7,101 @@ facetagram = window.facetagram || {};
 facetagram.Image = function(instagram, face)
 {
     var _genderConfidence = 40,
-        _faceConfidence = 50;
+        _faceConfidence = 50,
+        _moodConfidence = 30;
     
     return {
         data: {instagram: instagram, face: face},
         hasFace: _hasFace,
         hasFemale: _hasFemale,
         hasMale: _hasMale,
-        getThumbnail: _getThumbnail
+        hasGroup: _hasGroup,
+        hasSuprised: _hasSuprised,
+        hasAngry: _hasAngry,
+        hasHappy: _hasHappy,
+        hasSad: _hasSad,
+        hasNeutral: _hasNeutral,
+        hasGlasses: _hasGlasses,
+        getThumbnail: _getThumbnail,
+        getImage: _getImage
     };
 
     function _hasFace()
     {
-        var faceAttributes, i=0,
-            tags = face.tags,
-            len = tags.length;
-        
-        for (; i<len ; i++)
-        {
-            faceAttributes = tags[i].attributes.face;
-            if (faceAttributes.value === "true" && faceAttributes.confidence >= _faceConfidence)
-                return true;
-        }
-
-        return false;
+        return _hasAttribute("face", "true", _faceConfidence);
     };
 
     function _hasFemale()
     {
-        return _hasGender("female");
+        return _hasAttribute("gender", "female", _genderConfidence);
     };
 
     function _hasMale()
     {
-        return _hasGender("male");
+        return _hasAttribute("gender", "male", _genderConfidence);
     };
 
-    function _hasGender(gender)
+    function _hasSuprised()
+    {
+        return _hasAttribute("mood", "suprised", _moodConfidence);
+    };
+
+    function _hasAngry()
+    {
+        return _hasAttribute("mood", "angry", _moodConfidence);
+    };
+
+    function _hasHappy()
+    {
+        return _hasAttribute("mood", "happy", _moodConfidence);
+    };
+
+    function _hasSad()
+    {
+        return _hasAttribute("mood", "sad", _moodConfidence);
+    };
+
+    function _hasNeutral()
+    {
+        return _hasAttribute("mood", "neutral", _moodConfidence);
+    };
+
+    function _hasGlasses()
+    {
+        return _hasAttribute("glasses", "true", _moodConfidence);
+    };
+
+    function _hasAttribute(attribute, value, confidence, skipFaceCheck)
+    {
+        var attr, i=0,
+        tags = face.tags,
+        len = tags.length;
+        
+        for (; i<len ; i++)
+        {
+            attr = tags[i].attributes[attribute];
+            if (attr && attr.value === value && attr.confidence >= confidence)
+                return true;
+        }
+        return false;
+    };
+
+    function _hasGroup()
     {
         if (_hasFace())
-        {
-            var genderAttributes, i=0,
-            tags = face.tags,
-            len = tags.length;
-        
-            for (; i<len ; i++)
-            {
-                genderAttributes = tags[i].attributes.gender;
-                if (genderAttributes && genderAttributes.value === gender && genderAttributes.confidence >= _genderConfidence)
-                    return true;
-            }
-        }
+            return face.tags.length > 1;
         return false;
     };
 
     function _getThumbnail()
     {
         return instagram.images.thumbnail;
-    }
+    };
+
+    function _getImage()
+    {
+        return instagram.images.standard_resolution;
+    };
 }
 
 var InstagramApi = (function(apiKey){
@@ -215,6 +252,9 @@ facetagram.ImageRepository = (function(){
         {coords:{latitude:34.0522222, longitude:-118.2427778}}, //los angeles
         {coords:{latitude:40.7141667, longitude:-74.0063889}}, //new york
         {coords:{latitude:48.856614, longitude:2.352222}}, //paris
+        {coords:{latitude:22.396428, longitude:114.109497}}, //hong kong
+        {coords:{latitude:35.689488, longitude:139.691706}}, //tokio
+        {coords:{latitude:55.755786, longitude:37.617633}}, //moscow
         {coords:{latitude:51.500152, longitude:-0.126236}} //london
     ];
     
