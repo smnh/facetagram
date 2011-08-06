@@ -213,7 +213,9 @@ facetagram.ImageRepository = (function(){
         {coords:{latitude:32.0431, longitude:34.7722}}, //holon
         {coords:{latitude:37.775, longitude:-122.4183333}}, //san francisco
         {coords:{latitude:34.0522222, longitude:-118.2427778}}, //los angeles
-        {coords:{latitude:40.7141667, longitude:-74.0063889}} //new york
+        {coords:{latitude:40.7141667, longitude:-74.0063889}}, //new york
+        {coords:{latitude:48.856614, longitude:2.352222}}, //paris
+        {coords:{latitude:51.500152, longitude:-0.126236}} //london
     ];
     
     var _images = [];
