@@ -18,7 +18,7 @@ $(function() {
 //	photoLibraryPage.render();
 	
 	imageLibrary = new facetagram.ImageLibrary({
-		element: view.$pageWrapper.get(0)
+		appView: view
 	});
 	imageLibrary.showImages();
 });
