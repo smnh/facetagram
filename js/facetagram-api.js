@@ -244,10 +244,10 @@ facetagram.api = (function(){
 
 facetagram.ImageRepository = (function(){
     
-    var _locations = [];//[{coords:{latitude:32.066157, longitude:34.777821}}, //tel-aviv
-//        {coords:{latitude:32.8155556, longitude:34.9891667}}, //haifa
-//        {coords:{latitude:32.068423, longitude:34.824787}}, //ramat gan
-//        {coords:{latitude:32.0431, longitude:34.7722}}, //holon
+    var _locations = [{coords:{latitude:32.066157, longitude:34.777821}}, //tel-aviv
+        {coords:{latitude:32.8155556, longitude:34.9891667}}, //haifa
+        {coords:{latitude:32.068423, longitude:34.824787}}, //ramat gan
+        {coords:{latitude:32.0431, longitude:34.7722}}];//, //holon
 //        {coords:{latitude:37.775, longitude:-122.4183333}}, //san francisco
 //        {coords:{latitude:34.0522222, longitude:-118.2427778}}, //los angeles
 //        {coords:{latitude:40.7141667, longitude:-74.0063889}}, //new york
