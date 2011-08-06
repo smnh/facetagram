@@ -109,10 +109,9 @@ var InstagramApi = (function(apiKey){
         );
         return;
 
-        function getLocationImages(locationData, index, callback, scope, images)
+        function getLocationImages(locationData, index, callback, scope)
         {
             index = index || 0;
-            images = images || [];
             if (index < locationData.length)
             {
                 (function(locationId){
@@ -121,14 +120,12 @@ var InstagramApi = (function(apiKey){
                     ts=ts-(((86400)*1000));
                     _makeRequest(location_images.replace("{0}", locationId), /*{min_timestamp : -ts*100}*/null, 
                         function(data){
-                            images = images.concat(data.data);
-                            getLocationImages(locationData, ++index, callback, scope, images);
+                            callback.call(scope, data.data);
+                            getLocationImages(locationData, ++index, callback, scope);
                         });
 
                 })(locationData[index].id);
             }
-            else
-                callback.call(scope, images);
         };
     };
 
@@ -169,10 +166,10 @@ facetagram.api = (function(){
                 map[images[i].images.standard_resolution.url] = images[i];
             }
             
-            _makeFaceRequest(urls, map, _callback, _scope, []);
+            _makeFaceRequest(urls, map, _callback, _scope)
             return;
 
-            function _makeFaceRequest(urls, map, callback, scope, images)
+            function _makeFaceRequest(urls, map, callback, scope)
             {
                 if (urls.length)
                 {
@@ -189,16 +186,17 @@ facetagram.api = (function(){
                         FaceClientAPI.faces_detect(partial, function(url, data){
                             if (data.status == "success")
                             {
+                                var images = [];
                                 for (var i=0,len=data.photos.length ; i<len ; i++)
                                     images.push(new facetagram.Image(map[data.photos[i].url], data.photos[i]));
+
+                                callback.call(scope, images);
                             }
-                            _makeFaceRequest(urls, map, callback, scope, images);
+                            _makeFaceRequest(urls, map, callback, scope);
                         });
 
                     })(partial);
                 }
-                else
-                    callback.call(scope, images);
             };
 
         }
