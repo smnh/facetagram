@@ -109,10 +109,9 @@ var InstagramApi = (function(apiKey){
         );
         return;
 
-        function getLocationImages(locationData, index, callback, scope, images)
+        function getLocationImages(locationData, index, callback, scope)
         {
             index = index || 0;
-            images = images || [];
             if (index < locationData.length)
             {
                 (function(locationId){
@@ -121,14 +120,12 @@ var InstagramApi = (function(apiKey){
                     ts=ts-(((86400)*1000));
                     _makeRequest(location_images.replace("{0}", locationId), /*{min_timestamp : -ts*100}*/null, 
                         function(data){
-                            images = images.concat(data.data);
-                            getLocationImages(locationData, ++index, callback, scope, images);
+                            callback.call(scope, data.data);
+                            getLocationImages(locationData, ++index, callback, scope);
                         });
 
                 })(locationData[index].id);
             }
-            else
-                callback.call(scope, images);
         };
     };
 
