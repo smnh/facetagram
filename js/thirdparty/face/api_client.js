@@ -289,7 +289,7 @@ function Face_ClientAPI(_apiKey, _apiSecret)
 	{
 		if (!apiKey) throw EXCEPTION_INIT;
 		
-		var sUrl = REST_URL + method + "." + format + "?api_key=" + encodeURIComponent(apiKey) + "&api_secret=" + encodeURIComponent(apiSecret);
+		var sUrl = REST_URL + method + "." + format + "?api_key=" + encodeURIComponent(apiKey) + "&api_secret=" + encodeURIComponent(apiSecret) + "&attributes=all";
 		
 		if (params != null)
 		{
