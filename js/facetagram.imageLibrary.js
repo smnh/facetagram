@@ -22,6 +22,7 @@ facetagram = window.facetagram || {};
 		this.$page.show();
 		
         ns.ImageRepository.subscribe(function(images){
+			
             self.showImages(images);
             self.lastImageIndex = images.length;
 
