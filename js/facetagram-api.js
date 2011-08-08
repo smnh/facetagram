@@ -71,7 +71,7 @@ facetagram.Image = function(instagram, face)
         return _hasAttribute("glasses", "true", _moodConfidence);
     };
 
-    function _hasAttribute(attribute, value, confidence, skipFaceCheck)
+    function _hasAttribute(attribute, value, confidence)
     {
         var attr, i=0,
         tags = face.tags,

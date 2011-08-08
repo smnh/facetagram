@@ -52,6 +52,8 @@ facetagram.locationHelper = (function(){
                 navigator.geolocation.getCurrentPosition(_success,_error,{timeout:10000});
             else if (geo_position_js.init())
                 geo_position_js.getCurrentPosition(_success, _error,{timeout:10000});
+			else
+				_error();
         }        
     };
 
