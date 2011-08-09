@@ -110,7 +110,7 @@ ul, li {
 	position: relative;
 	background-image: url(../images/header-background.png);
 	background-repeat: repeat-x;
-	-webkit-backgrounnd-size: 44px 5px;
+	-webkit-background-size: 5px 44px;
 }
 #header .logo {
 	margin: 0px auto;
@@ -184,6 +184,7 @@ ul, li {
 #footer {
 	position: relative;
 	height: 49px;
+	border-top: 1px solid #000000;
 }
 #footer #footerMenu {
 	position: relative;
@@ -191,7 +192,7 @@ ul, li {
 	height: 49px;
 	background-image: url(../images/footer-background.png);
 	background-repeat: repeat-x;
-	-webkit-backgrounnd-size: 49px 4px;
+	-webkit-background-size: 4px 49px;
 }
 #footer .footerMenuItem {
 	position: relative;
@@ -207,13 +208,25 @@ ul, li {
 	width: 63px;
 	border-right: none;
 }
+#footer .footerMenuItem.drawable {
+	background-image: url(../images/submenu-arrow.png);
+	-webkit-background-size: 28px 13px;
+	background-repeat: no-repeat;
+	background-position: top right;
+}
+#footer .footerMenuItem.drawable.opened {
+	background-image: url(../images/submenu-arrow.png), url(../images/menuitem-red-bar.png);
+	-webkit-background-size: 28px 13px, 2px 3px;
+	background-repeat: no-repeat, repeat-x;
+	background-position: top right, bottom left;
+}
 #footer .footerMenuItem .icon {
 	position: relative;
 	height: 100%;
 	border-right: 1px solid #000000;
 	border-left: 1px solid #7d8385;
 	background-repeat: no-repeat;
-	background-position: center 0px;
+	background-position: center 10px;
 }
 #footer .footerMenuItem:first-child .icon {
 	border-left: none;
@@ -221,28 +234,116 @@ ul, li {
 #footer .footerMenuItem:last-child .icon {
 	border-right: none;
 }
-#footer .footerMenuItem .icon.genderBoth {
-	background-image: url(../images/gender-both-icon.png);
-	-webkit-background-size: 36px 49px;
-}
-#footer .footerMenuItem .icon.location {
-	background-image: url(../images/location-icon.png);
-	-webkit-background-size: 15px 49px;
-}
-#footer .footerMenuItem .icon.time {
-	background-image: url(../images/time-icon.png);
-	-webkit-background-size: 17px 49px;
-}
 #footer .subMenuDrawler {
 	position: absolute;
 	z-index: 1;
 	left: 0px;
-	top: -1px;
-	height: 100px;
-	-webkit-transform: translate(-1px, -100px);
+	top: 0px;
+	-webkit-transform: translate(-1px, 0);
+	-webkit-transition-property: -webkit-transform;
+	-webkit-transition-duration: 200ms;
 	border-width: 5px 5px 0px 3px; 
 	-webkit-border-image: url(../images/drawler-background.png) 10 10 0 6;
 	-webkit-background-size: 69px 7px;
+}
+#footer .subMenuDrawler.slideUp {
+	-webkit-transform: translate(-1px, -100%);
+}
+#footer .subMenuDrawler .submenuItem {
+	width: 100%;
+	height: 46px;
+	border-top: 1px solid #707070;
+	border-bottom: 1px solid #3d3d3d;
+}
+#footer .subMenuDrawler .submenuItem:first-child {
+	border-top: none;
+}
+#footer .subMenuDrawler .submenuItem:last-child {
+	border-bottom: none;
+}
+#footer .subMenuDrawler .submenuItem .buttonWrapper {
+	margin: 1px;
+	border: 1px solid transparent;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+}
+#footer .subMenuDrawler .submenuItem.pressed .buttonWrapper {
+	border: 1px solid #292a2b;
+	background-color: #707070;
+}
+#footer .subMenuDrawler .submenuItem .buttonWrapper .icon {
+	width: 100%;
+	height: 29px;
+	background-repeat: no-repeat;
+	background-position: center -2px;
+	overflow: hidden;
+}
+#footer .subMenuDrawler .submenuItem .buttonWrapper .icon.selected {
+	background-position: center -38px;
+}
+#footer .subMenuDrawler .submenuItem .buttonWrapper .label {
+	height: 13px;
+	line-height: 13px;
+	font-size: 10px;
+	font-family: Helvetica;
+	text-align: center;
+	color: #a8a8a8;
+}
+#footer .icon.groupBoth {
+	background-image: url(../images/group-both-icon.png);
+	-webkit-background-size: 54px 72px;
+}
+#footer .icon.groupMany {
+	background-image: url(../images/group-many-icon.png);
+	-webkit-background-size: 35px 72px;
+}
+#footer .icon.groupSingle {
+	background-image: url(../images/group-single-icon.png);
+	-webkit-background-size: 10px 72px;
+}
+#footer .icon.genderBoth {
+	background-image: url(../images/gender-both-icon.png);
+	-webkit-background-size: 36px 72px;
+}
+#footer .icon.genderMale {
+	background-image: url(../images/gender-male-icon.png);
+	-webkit-background-size: 18px 72px;
+}
+#footer .icon.genderFemale {
+	background-image: url(../images/gender-female-icon.png);
+	-webkit-background-size: 16px 72px;
+}
+#footer .icon.moodAll {
+	background-image: url(../images/mood-all-icon.png);
+	-webkit-background-size: 35px 72px;
+}
+#footer .icon.moodHappy {
+	background-image: url(../images/mood-happy-icon.png);
+	-webkit-background-size: 16px 72px;
+}
+#footer .icon.moodSad {
+	background-image: url(../images/mood-sad-icon.png);
+	-webkit-background-size: 16px 72px;
+}
+#footer .icon.moodAngry {
+	background-image: url(../images/mood-angry-icon.png);
+	-webkit-background-size: 16px 72px;
+}
+#footer .icon.moodSurprised {
+	background-image: url(../images/mood-surprised-icon.png);
+	-webkit-background-size: 16px 72px;
+}
+#footer .icon.moodNeutral {
+	background-image: url(../images/mood-neutral-icon.png);
+	-webkit-background-size: 16px 72px;
+}
+#footer .icon.location {
+	background-image: url(../images/location-icon.png);
+	-webkit-background-size: 15px 72px;
+}
+#footer .icon.time {
+	background-image: url(../images/time-icon.png);
+	-webkit-background-size: 17px 72px;
 }
 /* --------------------------- */
 /* ---------- Pages ---------- */

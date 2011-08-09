@@ -1,8 +1,11 @@
+/* jslint browser: true, sloppy: true, windows: true, white: true, nomen: true, maxerr: 50, indent: 4 */
+/*global facetagram: true, window, $, console, iScroll */
+
 facetagram = window.facetagram || {};
 
 (function(ns) {
 	
-	var AppView, Footer;
+	var AppView, Footer, Drawler;
 	
 	AppView = function() {
 		
@@ -19,7 +22,7 @@ facetagram = window.facetagram || {};
 		});
 		
 		this.currentPage = null;
-		this.footer = new Footer();
+		this.footer = new Footer(this);
 		
 		this.$pageWrapper = $("#pageWrapper");
 		this.$uiBlocker = $("#uiBlocker");
@@ -29,6 +32,10 @@ facetagram = window.facetagram || {};
 		});
 		
 		this.setDimensions();
+		
+		this.imageLibrary = new ns.ImageLibrary({
+			appView: this
+		});
 	};
 	
 	AppView.prototype = {
@@ -38,7 +45,7 @@ facetagram = window.facetagram || {};
 		
 		blockUI: function(loadingIndicator) {
 			if (loadingIndicator) {
-				this.$uiBlocker.html(loadingIndicatorDiv);
+				this.$uiBlocker.html(ns.utils.loadingIndicatorDiv);
 				this.$uiBlocker.addClass("loading");
 			}
 			this.$uiBlocker.show();
@@ -55,7 +62,7 @@ facetagram = window.facetagram || {};
 		setDimensions: function() {
 			this.$pageWrapper.height(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
 			if (this.currentPage) {
-				self.refreshIScroll(this.currentPage.$page);
+				this.refreshIScroll(this.currentPage.$page);
 			}
 		},
 		
@@ -95,86 +102,243 @@ facetagram = window.facetagram || {};
 	
 	ns.AppView = AppView;
 	
-	Footer = function() {
-		var prop, menuItem, self = this;
+	Drawler = function(footer, menuItem) {
+		
+		var self = this, submenuItemId, submenuItemElm;
+		
+		this.footer = footer;
+		this.appView = this.footer.appView;
+		
+		this.element = document.createElement("div");
+		this.element.className = "subMenuDrawler";
+		this.element.style.left = menuItem.element.offsetLeft + "px";
+		this.element.style.width = (menuItem.element.offsetWidth - 4) + "px";
+		
+		this.menuItem = menuItem;
+		this.menuItem.opened = true;
+		$(this.menuItem.element).addClass("opened");
+		
+		this.submenuItemElms = [];
+		
+		for (submenuItemId in menuItem.submenu) {
+			if (menuItem.submenu.hasOwnProperty(submenuItemId)) {
+				submenuItemElm = document.createElement("div");
+				submenuItemElm.className = "submenuItem";
+				submenuItemElm.innerHTML = '' +
+					'<div class="buttonWrapper">' +
+						'<div class="icon ' + submenuItemId + (menuItem.selected === submenuItemId ? ' selected' : '') + '"></div>' +
+						'<div class ="label">' + menuItem.submenu[submenuItemId].title + '</div>' +
+					'</div>';
+				
+				this.submenuItemElms.push(submenuItemElm);
+				
+				this.bindSubmenuItemHandler(submenuItemElm, submenuItemId);
+				
+				this.element.appendChild(submenuItemElm);
+			}
+		}
+		
+		document.addEventListener(ns.utils.START_EVENT, this, false);
+		
+		this.footer.element.appendChild(this.element);
+		
+		this.show();
+	};
+	
+	Drawler.prototype = {
+		constructor: Drawler,
+		
+		destroy: function() {
+			var i;
+			
+			this.menuItem.opened = false;
+			
+			for (i = 0; i < this.submenuItemElms.length; i++) {
+				$(this.submenuItemElms[i]).unbindImmediateClick();
+			}
+			
+			$(this.element).remove();
+		},
+		
+		show: function() {
+			var self = this;
+			
+			window.setTimeout(function() {
+				$(self.element).addClass("slideUp");
+			}, 0);
+		},
+		
+		hide: function() {
+			var self = this;
+			
+			this.element.addEventListener('webkitTransitionEnd', this, false);
+			window.setTimeout(function() {
+				$(self.menuItem.element).removeClass("opened");
+				$(self.element).removeClass("slideUp");
+			}, 0);
+		},
+		
+		bindSubmenuItemHandler: function(submenuItemElm, submenuItemId) {
+			var self = this;
+			
+			$(submenuItemElm).bindImmediateClick(function(event) {
+				var newFilter = {};
+				
+				$(self.menuItem.icon).removeClass(self.menuItem.selected);
+				self.menuItem.selected = submenuItemId;
+				$(self.menuItem.icon).addClass(self.menuItem.selected);
+				
+				newFilter[self.menuItem.id] = self.menuItem.selected;
+				self.appView.imageLibrary.showImages(newFilter);
+				
+				self.hide();
+			});
+		},
+		
+		handleEvent: function(event) {
+			var self = this,
+				_event = ns.utils.isTouch && event.changedTouches ? event.changedTouches[0] : event,
+				target = _event.target,
+				currentTarget = event.currentTarget;
+			
+			switch (event.type) {
+				case ns.utils.START_EVENT:
+					if ($(target).closest(".subMenuDrawler").length === 0 &&
+						($(target).closest(".footerMenuItem").length === 0 || $(target).closest(".footerMenuItem").get(0) !== this.menuItem.element)) {
+						document.removeEventListener(ns.utils.START_EVENT, this, false);
+						this.hide();
+					}
+					break;
+				case 'webkitTransitionEnd':
+					this.element.removeEventListener('webkitTransitionEnd', this, false);
+					this.destroy();
+					break;
+			}
+		}
+	};
+	
+	ns.Footer = Drawler;
+	
+	Footer = function(appView) {
+		var self = this, prop, menuItemId, menuItem;
+		
+		this.appView = appView;
 		
 		this.menuItems = {
 			"group": {
-				defaultMenuItem: "groupAndSingle",
+				id: "group",
+				defaultMenuItem: "groupBoth",
+				selected: null,
+				opened: false,
+				element: null,
 				submenu: {
-					"groupAndSingle": {
-						
+					"groupMany": {
+						title: "Group"
+					},
+					"groupSingle": {
+						title: "One Person"
+					},
+					"groupBoth": {
+						title: "Both"
 					}
 				}
 			},
 			"gender": {
+				id: "gender",
 				defaultMenuItem: "genderBoth",
+				selected: null,
+				opened: false,
+				element: null,
 				submenu: {
-					"males": {
-						
+					"genderMale": {
+						title: "Guys"
 					},
-					"females": {
-						
+					"genderFemale": {
+						title: "Gals"
 					},
 					"genderBoth": {
-						
+						title: "Both"
 					}
 				}
 			},
 			"mood": {
+				id: "mood",
 				defaultMenuItem: "moodAll",
+				selected: null,
+				opened: false,
+				element: null,
 				submenu: {
+					"moodNeutral": {
+						title: "Neutral"
+					},
+					"moodSurprised": {
+						title: "Surprised"
+					},
+					"moodAngry": {
+						title: "Angry"
+					},
+					"moodSad": {
+						title: "Sad"
+					},
+					"moodHappy": {
+						title: "Happy"
+					},
 					"moodAll": {
-						
+						title: "All Moods"
 					}
 				}
 			},
-			"location": {},
-			"time": {}
+			"location": {
+				id: "location",
+				element: null
+			},
+			"time": {
+				id: "time",
+				element: null
+			}
 		};
 		
-		this.$footer = $("#footer");
+		this.element = $("#footer").get(0);
 		this.$footerMenu = $("#footerMenu");
 		
 		for (prop in this.menuItems) {
-			if (this.menuItems[prop].submenu) {
-				menuItemId = this.menuItems[prop].defaultMenuItem;
-				menuItem = this.menuItems[prop].submenu[menuItemId];
-			} else {
-				menuItemId = prop;
+			if (this.menuItems.hasOwnProperty(prop)) {
+				if (this.menuItems[prop].submenu) {
+					menuItemId = this.menuItems[prop].defaultMenuItem;
+				} else {
+					menuItemId = prop;
+				}
+				
 				menuItem = this.menuItems[prop];
+				
+				menuItem.icon = $('<div class="icon ' + menuItemId + '"></div>').get(0);
+				menuItem.element = $('<div class="footerMenuItem"></div>').get(0);
+				menuItem.element.appendChild(menuItem.icon);
+				
+				if (this.menuItems[prop].submenu) {
+					$(menuItem.element).addClass("drawable");
+					this.menuItems[prop].selected = menuItemId;
+					this.bindFooterMenuHandler(menuItem);
+				}
+				
+				this.$footerMenu.append(menuItem.element);
 			}
-			
-			menuItem.$element = $('<div class="footerMenuItem"><div class="icon ' + menuItemId + '"></div></div>');
-			
-			if (this.menuItems[prop].submenu) {
-				(function(menuItem) {
-					menuItem.$element.bindImmediateClick(function(event) {
-						var $drawler = $('<div class="subMenuDrawler"></div>');
-						
-						$drawler.css({
-							"left": menuItem.$element.offset().left,
-							"width": (menuItem.$element.width() - 4) + "px",
-						});
-						
-						function removeDrawler() {
-							document.removeEventListener(ns.utils.START_EVENT, removeDrawler, false);
-							$drawler.remove();
-						}
-						
-						document.addEventListener(ns.utils.START_EVENT, removeDrawler, false)
-						
-						self.$footer.append($drawler);
-					});
-				})(menuItem);
-			}
-			
-			this.$footerMenu.append(menuItem.$element);
 		}
 	};
 	
 	Footer.prototype = {
-		constructor: Footer
+		constructor: Footer,
+		
+		bindFooterMenuHandler: function(menuItem) {
+			var self = this;
+			
+			$(menuItem.element).bindImmediateClick(function(event) {
+				if (menuItem.opened) {
+					return;
+				}
+				var drawler = new Drawler(self, menuItem);
+			});
+		}
 	};
 	
 	ns.Footer = Footer;
