@@ -23,6 +23,7 @@ facetagram.Image = function(instagram, face)
         hasNeutral: _hasNeutral,
         hasGlasses: _hasGlasses,
         getThumbnail: _getThumbnail,
+		getLowResImage: _getLowResImage,
         getImage: _getImage
     };
 
@@ -97,7 +98,12 @@ facetagram.Image = function(instagram, face)
     {
         return instagram.images.thumbnail;
     };
-
+	
+	function _getLowResImage()
+	{
+		return instagram.images.low_resolution;
+	};
+	
     function _getImage()
     {
         return instagram.images.standard_resolution;
