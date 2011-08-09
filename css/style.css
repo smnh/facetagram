@@ -2,6 +2,7 @@ html {
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
+	-webkit-text-size-adjust: none;
 }
 body {
 	position: relative;

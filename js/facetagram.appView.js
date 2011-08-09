@@ -71,7 +71,7 @@ facetagram = window.facetagram || {};
 				$wrapper,
 				wrapperHeight,
 				scrollerMinHeight,
-				scroller;
+				iscroll;
 			
 			if ($scroller.length) {
 				// Calculate scroller min-height
@@ -81,14 +81,17 @@ facetagram = window.facetagram || {};
 				$scroller.css("min-height", scrollerMinHeight + "px");
 				
 				// Check if iScroll already initiated on current scroller element
-				if (!$scroller.data("scroller")) {
-					scroller = new iScroll($wrapper.get(0), {
+				if (!$scroller.data("iscroll")) {
+					iscroll = new iScroll($wrapper.get(0), {
 						"desktopCompatibility": true,
 						"checkDOMChanges": false
 					});
-					$scroller.data("scroller", scroller);
+					$scroller.get(0).immediateClickIScroll = iscroll;
+					$scroller.data("iscroll", iscroll);
 				} else {
-					window.setTimeout(function () { $scroller.data("scroller").refresh(); }, 0);
+					window.setTimeout(function () {
+						$scroller.data("iscroll").refresh();
+					}, 0);
 				}
 				// Prevent iScroll from catching START_EVENT on input and select
 				// and preventing it's default action of focusing (needed only for
