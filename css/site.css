@@ -2,7 +2,7 @@
 
 .wrapper 
 {
-    background: url(../images/top_bg.gif) repeat-x 0 0;
+    background: url(../images/top_bg.jpg) repeat-x 0 0;
 }
 
 .main
@@ -10,7 +10,7 @@
     width: 1024px;
     height: 798px;
     margin: auto;
-    background: url(../images/main.gif) no-repeat 0 0;
+    background: url(../images/main.jpg) no-repeat 0 0;
     display: block;
     position:relative;
 }
