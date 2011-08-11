@@ -226,7 +226,7 @@ facetagram = window.facetagram || {};
 						.append('<img src="' + _image.src + '" alt="' + caption + '" />');
 				};
 				
-				_image.src = image.data.instagram.images.low_resolution.url;
+				_image.src = image.getLowResImage().url;
 			});
 			
 		}
