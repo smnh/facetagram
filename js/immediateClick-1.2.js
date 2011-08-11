@@ -272,7 +272,7 @@
 				this.moved = true;
 			}
 		} else {
-			pageX = isTouch ? event.changedTouches[0].pageX : event.pageX,
+			pageX = isTouch ? event.changedTouches[0].pageX : event.pageX;
 			pageY = isTouch ? event.changedTouches[0].pageY : event.pageY;
 			
 			this.absDistX += Math.abs(pageX - this.prevPageX);
