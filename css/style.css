@@ -178,6 +178,16 @@ ul, li {
 #header .rightHeaderButton {
 	right: 5px;
 }
+#header .headerButton.instagramLogin {
+	padding: 0px;
+	width: 73px;
+	height: 27px;
+	border: none;
+	background-image: url(../images/instagram-sign-in.png);
+	background-size: 73px 27px;
+	-webkit-border-radius: 0px;
+	border-radius: 0px;
+}
 /* ---------------------------- */
 /* ---------- Footer ---------- */
 /* ---------------------------- */

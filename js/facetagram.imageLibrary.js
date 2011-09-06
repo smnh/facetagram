@@ -271,6 +271,12 @@ facetagram = window.facetagram || {};
 				"gender": this.footer.menuItems.gender.defaultMenuItem,
 				"mood": this.footer.menuItems.mood.defaultMenuItem
 			};
+			
+			this.addLeftHeaderButton({
+				className: "instagramLogin"
+			}).bindImmediateClick(function(event) {
+				window.location = "https://instagram.com/oauth/authorize/?client_id=" + instagramApiKey + "&redirect_uri=" + window.location.href.replace(/#.*/, "") + "&response_type=token";
+			});
 		},
 		
 		// Overwriting default refresh method
