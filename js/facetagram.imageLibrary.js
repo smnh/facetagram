@@ -1,11 +1,236 @@
-/* jslint browser: true, sloppy: true, windows: true, white: true, nomen: true, maxerr: 50, indent: 4 */
+/* jslint browser: true, sloppy: true, windows: true, white: true, nomen: true, plusplus: true, maxerr: 50, indent: 4 */
 /*global facetagram: true, window, $, console */
 
 facetagram = window.facetagram || {};
 
 (function(ns) {
 	
-	var ImageLibraryPage, SingleImagePage;
+	var Drawler, Footer, ImageLibraryPage, SingleImagePage;
+	
+	Drawler = function(footer, menuItem) {
+		
+		var submenuItemId, submenuItemElm;
+		
+		this.footer = footer;
+		
+		this.element = document.createElement("div");
+		this.element.className = "subMenuDrawler";
+		this.element.style.left = menuItem.element.offsetLeft + "px";
+		this.element.style.width = (menuItem.element.offsetWidth - 4) + "px";
+		
+		this.menuItem = menuItem;
+		this.menuItem.opened = true;
+		this.menuItem.drawler = this;
+		$(this.menuItem.element).addClass("opened");
+		
+		this.submenuItemElms = [];
+		
+		for (submenuItemId in menuItem.submenu) {
+			if (menuItem.submenu.hasOwnProperty(submenuItemId)) {
+				submenuItemElm = document.createElement("div");
+				submenuItemElm.className = "submenuItem";
+				submenuItemElm.innerHTML =
+					'<div class="buttonWrapper">' +
+						'<div class="icon ' + submenuItemId + (menuItem.selected === submenuItemId ? ' selected' : '') + '"></div>' +
+						'<div class ="label">' + menuItem.submenu[submenuItemId].title + '</div>' +
+					'</div>';
+				
+				this.submenuItemElms.push(submenuItemElm);
+				
+				this.bindSubmenuItemHandler(submenuItemElm, submenuItemId);
+				
+				this.element.appendChild(submenuItemElm);
+			}
+		}
+		
+		document.addEventListener(ns.utils.START_EVENT, this, false);
+		
+		this.footer.element.appendChild(this.element);
+		
+		this.show();
+	};
+	
+	Drawler.prototype = {
+		constructor: Drawler,
+		
+		destroy: function() {
+			var i;
+			
+			this.menuItem.opened = false;
+			this.menuItem.drawler = null;
+			
+			for (i = 0; i < this.submenuItemElms.length; i++) {
+				$(this.submenuItemElms[i]).unbindImmediateClick();
+			}
+			
+			$(this.element).remove();
+		},
+		
+		show: function() {
+			var self = this;
+			
+			window.setTimeout(function() {
+				$(self.element).addClass("slideUp");
+			}, 0);
+		},
+		
+		hide: function() {
+			var self = this;
+			
+			this.element.addEventListener('webkitTransitionEnd', this, false);
+			window.setTimeout(function() {
+				$(self.menuItem.element).removeClass("opened");
+				$(self.element).removeClass("slideUp");
+			}, 0);
+		},
+		
+		bindSubmenuItemHandler: function(submenuItemElm, submenuItemId) {
+			var self = this;
+			
+			$(submenuItemElm).bindImmediateClick(function(event) {
+				var newFilter = {};
+				
+				$(self.menuItem.icon).removeClass(self.menuItem.selected);
+				self.menuItem.selected = submenuItemId;
+				$(self.menuItem.icon).addClass(self.menuItem.selected);
+				
+				newFilter[self.menuItem.id] = self.menuItem.selected;
+				self.footer.page.showImages(newFilter);
+				
+				self.hide();
+			});
+		},
+		
+		handleEvent: function(event) {
+			var _event = ns.utils.isTouch && event.changedTouches ? event.changedTouches[0] : event,
+				target = _event.target,
+				currentTarget = event.currentTarget;
+			
+			switch (event.type) {
+				case ns.utils.START_EVENT:
+					if ($(target).closest(".subMenuDrawler").length === 0 &&
+						($(target).closest(".footerMenuItem").length === 0 || $(target).closest(".footerMenuItem").get(0) !== this.menuItem.element)) {
+						document.removeEventListener(ns.utils.START_EVENT, this, false);
+						this.hide();
+					}
+					break;
+				case 'webkitTransitionEnd':
+					this.element.removeEventListener('webkitTransitionEnd', this, false);
+					this.destroy();
+					break;
+			}
+		}
+	};
+	
+	ns.Drawler = Drawler;
+	
+	Footer = function(page) {
+		var prop, menuItemId, menuItem;
+		
+		this.page = page;
+		
+		this.menuItems = {
+			"group": {
+				id: "group",
+				defaultMenuItem: "groupBoth",
+				selected: null,
+				opened: false,
+				element: null,
+				submenu: {
+					"groupMany": {title: "Group"},
+					"groupSingle": {title: "1 Person"},
+					"groupBoth": {title: "Both"}
+				}
+			},
+			"gender": {
+				id: "gender",
+				defaultMenuItem: "genderBoth",
+				selected: null,
+				opened: false,
+				element: null,
+				submenu: {
+					"genderMale": {title: "Guys"},
+					"genderFemale": {title: "Gals"},
+					"genderBoth": {title: "Both"}
+				}
+			},
+			"mood": {
+				id: "mood",
+				defaultMenuItem: "moodAll",
+				selected: null,
+				opened: false,
+				element: null,
+				submenu: {
+					"moodNeutral": {title: "Neutral"},
+					"moodSurprised": {title: "Surprised"},
+					"moodAngry": {title: "Angry"},
+					"moodSad": {title: "Sad"},
+					"moodHappy": {title: "Happy"},
+					"moodAll": {title: "All Moods"}
+				}
+			},
+			"location": {
+				id: "location",
+				element: null
+			},
+			"time": {
+				id: "time",
+				element: null
+			}
+		};
+		
+		this.element = document.createElement('div');
+		this.element.id = 'footer';
+		this.footerMenuElm = document.createElement('div');
+		this.footerMenuElm.id = 'footerMenu';
+		this.element.appendChild(this.footerMenuElm);
+		
+		for (prop in this.menuItems) {
+			if (this.menuItems.hasOwnProperty(prop)) {
+				if (this.menuItems[prop].submenu) {
+					menuItemId = this.menuItems[prop].defaultMenuItem;
+				} else {
+					menuItemId = prop;
+				}
+				
+				menuItem = this.menuItems[prop];
+				
+				menuItem.icon = $('<div class="icon ' + menuItemId + '"></div>').get(0);
+				menuItem.element = $('<div class="footerMenuItem"></div>').get(0);
+				menuItem.element.appendChild(menuItem.icon);
+				
+				if (this.menuItems[prop].submenu) {
+					$(menuItem.element).addClass("drawable");
+					this.menuItems[prop].selected = menuItemId;
+					this.bindFooterMenuHandler(menuItem);
+				}
+				
+				this.footerMenuElm.appendChild(menuItem.element);
+			}
+		}
+		
+		this.page.element.appendChild(this.element);
+	};
+	
+	Footer.prototype = {
+		constructor: Footer,
+		
+		bindFooterMenuHandler: function(menuItem) {
+			var self = this;
+			
+			$(menuItem.element).bindImmediateClick(function(event) {
+				var drawler;
+				
+				if (menuItem.opened) {
+					menuItem.drawler.hide();
+				} else {
+					drawler = new Drawler(self, menuItem);
+				}
+			});
+		}
+	};
+	
+	ns.Footer = Footer;
 	
 	/**
 	 * ImageLibraryPage - Inherits from Page
@@ -22,31 +247,36 @@ facetagram = window.facetagram || {};
 		this.show();
 		
         ns.ImageRepository.subscribe(function(images){
-			
             self.appendImages(images);
             self.lastImageIndex = images.length;
-
         });
 	};
 	
 	ns.utils.inheritPrototype(ImageLibraryPage, ns.Page, {
 		
 		init: function() {
-			this.filterOptions = {
-				"group": this.appView.footer.menuItems.group.defaultMenuItem,
-				"gender": this.appView.footer.menuItems.gender.defaultMenuItem,
-				"mood": this.appView.footer.menuItems.mood.defaultMenuItem
-			};
-			
 			this.lastImageIndex = 0;
 			this.loading = true;
 			
-			this.$wrapper = $('<div class="wrapper"></div>');
+			this.$wrapper = $('<div class="wrapper">' + ns.utils.loadingIndicatorDiv + '</div>');
 			this.$scroller = $('<div class="scroller"></div>');
 			this.$imageGallery = $('<div class="imageGallery"></div>');
-			
 			this.$scroller.append(this.$imageGallery);
-			this.$wrapper.append(this.$scroller);
+			this.$element.empty();
+			this.$element.append(this.$wrapper);
+			this.footer = new Footer(this);
+			
+			this.filterOptions = {
+				"group": this.footer.menuItems.group.defaultMenuItem,
+				"gender": this.footer.menuItems.gender.defaultMenuItem,
+				"mood": this.footer.menuItems.mood.defaultMenuItem
+			};
+		},
+		
+		// Overwriting default refresh method
+		refresh: function(event) {
+			this.$wrapper.height(window.innerHeight - $("#header").outerHeight() - $(this.footer.element).outerHeight());
+			this.appView.refreshIScroll(this.$element);
 		},
 		
 		appendImage: function(image) {
@@ -67,8 +297,8 @@ facetagram = window.facetagram || {};
 			
 			if (this.loading) {
 				this.loading = false;
-				this.$element.empty();
-				this.$element.append(this.$wrapper);
+				this.$wrapper.empty();
+				this.$wrapper.append(this.$scroller);
 			}
 			
 			if (images && images.length) {
@@ -87,7 +317,7 @@ facetagram = window.facetagram || {};
 			
 			if (filterOptions) {
 				for (prop in filterOptions) {
-					if (this.filterOptions[prop] !== undefined) {
+					if (filterOptions.hasOwnProperty(prop) && this.filterOptions[prop] !== undefined) {
 						this.filterOptions[prop] = filterOptions[prop];
 					}
 				}
@@ -205,10 +435,14 @@ facetagram = window.facetagram || {};
 			
 			self.$element.empty();
 			self.$element.append(
-				'<div class="imageWrapper">' + ns.utils.loadingIndicatorDiv + '</div>' +
-				(caption ? '<div class="imageTitle">' + caption + '</div>' : '') +
-				(location ? '<div class="location">Taken at: ' + location + '</div>' : '') +
-				'<div class="imageFilters">' + filtersHtml + '</div>'
+				'<div class="wrapper">' +
+					'<div class="scroller">' +
+						'<div class="imageWrapper">' + ns.utils.loadingIndicatorDiv + '</div>' +
+						(caption ? '<div class="imageTitle">' + caption + '</div>' : '') +
+						(location ? '<div class="location">Taken at: ' + location + '</div>' : '') +
+						'<div class="imageFilters">' + filtersHtml + '</div>' +
+					'</div>' +
+				'</div>'
 			);
 			
 			this.$element.one("pageTransitionEnd", function(event) {
@@ -233,4 +467,4 @@ facetagram = window.facetagram || {};
 		
 	});
 	
-})(facetagram);
+}(facetagram));

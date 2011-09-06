@@ -186,7 +186,7 @@ ul, li {
 	width: 100%;
 	height: 49px;
 	border-top: 1px solid #000000;
-	z-index: 2;
+	z-index: 1;
 }
 #footer #footerMenu {
 	position: relative;
@@ -357,7 +357,6 @@ ul, li {
 }
 #pageWrapper {
 	position: relative;
-	z-index: 1;
 	width: 100%;
 	overflow: hidden;
 }

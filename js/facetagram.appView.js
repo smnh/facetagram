@@ -1,4 +1,4 @@
-/* jslint browser: true, sloppy: true, windows: true, white: true, nomen: true, maxerr: 50, indent: 4 */
+/* jslint browser: true, sloppy: true, windows: true, white: true, nomen: true, unparam: true, maxerr: 50, indent: 4 */
 /*global facetagram: true, window, $, console, iScroll */
 
 facetagram = window.facetagram || {};
@@ -6,7 +6,7 @@ facetagram = window.facetagram || {};
 (function(ns) {
 	
 	// Classes
-	var AppView, Footer, Drawler, Page;
+	var AppView, Page;
 	
 	AppView = function() {
 		
@@ -24,7 +24,6 @@ facetagram = window.facetagram || {};
 		
 		this.currentPage = null;
 		this.pageHistory = [];
-		this.footer = new Footer(this);
 		
 		this.$pageWrapper = $("#pageWrapper");
 		this.$uiBlocker = $("#uiBlocker");
@@ -62,14 +61,9 @@ facetagram = window.facetagram || {};
 		},
 		
 		setDimensions: function() {
-			if (this.currentPage && !this.currentPage.withFooter) {
-				this.$pageWrapper.height(window.innerHeight - $("#header").outerHeight());
-			} else {
-				this.$pageWrapper.height(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
-			}
-			
+			this.$pageWrapper.height(window.innerHeight - $("#header").outerHeight());
 			if (this.currentPage) {
-				this.refreshIScroll(this.currentPage.$element);
+				this.currentPage.refresh();
 			}
 		},
 		
@@ -157,252 +151,44 @@ facetagram = window.facetagram || {};
 	
 	ns.AppView = AppView;
 	
-	Drawler = function(footer, menuItem) {
-		
-		var self = this, submenuItemId, submenuItemElm;
-		
-		this.footer = footer;
-		this.appView = this.footer.appView;
-		
-		this.element = document.createElement("div");
-		this.element.className = "subMenuDrawler";
-		this.element.style.left = menuItem.element.offsetLeft + "px";
-		this.element.style.width = (menuItem.element.offsetWidth - 4) + "px";
-		
-		this.menuItem = menuItem;
-		this.menuItem.opened = true;
-		this.menuItem.drawler = this;
-		$(this.menuItem.element).addClass("opened");
-		
-		this.submenuItemElms = [];
-		
-		for (submenuItemId in menuItem.submenu) {
-			if (menuItem.submenu.hasOwnProperty(submenuItemId)) {
-				submenuItemElm = document.createElement("div");
-				submenuItemElm.className = "submenuItem";
-				submenuItemElm.innerHTML = '' +
-					'<div class="buttonWrapper">' +
-						'<div class="icon ' + submenuItemId + (menuItem.selected === submenuItemId ? ' selected' : '') + '"></div>' +
-						'<div class ="label">' + menuItem.submenu[submenuItemId].title + '</div>' +
-					'</div>';
-				
-				this.submenuItemElms.push(submenuItemElm);
-				
-				this.bindSubmenuItemHandler(submenuItemElm, submenuItemId);
-				
-				this.element.appendChild(submenuItemElm);
-			}
-		}
-		
-		document.addEventListener(ns.utils.START_EVENT, this, false);
-		
-		this.footer.element.appendChild(this.element);
-		
-		this.show();
-	};
-	
-	Drawler.prototype = {
-		constructor: Drawler,
-		
-		destroy: function() {
-			var i;
-			
-			this.menuItem.opened = false;
-			this.menuItem.drawler = null;
-			
-			for (i = 0; i < this.submenuItemElms.length; i++) {
-				$(this.submenuItemElms[i]).unbindImmediateClick();
-			}
-			
-			$(this.element).remove();
-		},
-		
-		show: function() {
-			var self = this;
-			
-			window.setTimeout(function() {
-				$(self.element).addClass("slideUp");
-			}, 0);
-		},
-		
-		hide: function() {
-			var self = this;
-			
-			this.element.addEventListener('webkitTransitionEnd', this, false);
-			window.setTimeout(function() {
-				$(self.menuItem.element).removeClass("opened");
-				$(self.element).removeClass("slideUp");
-			}, 0);
-		},
-		
-		bindSubmenuItemHandler: function(submenuItemElm, submenuItemId) {
-			var self = this;
-			
-			$(submenuItemElm).bindImmediateClick(function(event) {
-				var newFilter = {};
-				
-				$(self.menuItem.icon).removeClass(self.menuItem.selected);
-				self.menuItem.selected = submenuItemId;
-				$(self.menuItem.icon).addClass(self.menuItem.selected);
-				
-				newFilter[self.menuItem.id] = self.menuItem.selected;
-				self.appView.imageLibrary.showImages(newFilter);
-				
-				self.hide();
-			});
-		},
-		
-		handleEvent: function(event) {
-			var self = this,
-				_event = ns.utils.isTouch && event.changedTouches ? event.changedTouches[0] : event,
-				target = _event.target,
-				currentTarget = event.currentTarget;
-			
-			switch (event.type) {
-				case ns.utils.START_EVENT:
-					if ($(target).closest(".subMenuDrawler").length === 0 &&
-						($(target).closest(".footerMenuItem").length === 0 || $(target).closest(".footerMenuItem").get(0) !== this.menuItem.element)) {
-						document.removeEventListener(ns.utils.START_EVENT, this, false);
-						this.hide();
-					}
-					break;
-				case 'webkitTransitionEnd':
-					this.element.removeEventListener('webkitTransitionEnd', this, false);
-					this.destroy();
-					break;
-			}
-		}
-	};
-	
-	ns.Drawler = Drawler;
-	
-	Footer = function(appView) {
-		var self = this, prop, menuItemId, menuItem;
-		
-		this.appView = appView;
-		
-		this.menuItems = {
-			"group": {
-				id: "group",
-				defaultMenuItem: "groupBoth",
-				selected: null,
-				opened: false,
-				element: null,
-				submenu: {
-					"groupMany": {
-						title: "Group"
-					},
-					"groupSingle": {
-						title: "1 Person"
-					},
-					"groupBoth": {
-						title: "Both"
-					}
-				}
-			},
-			"gender": {
-				id: "gender",
-				defaultMenuItem: "genderBoth",
-				selected: null,
-				opened: false,
-				element: null,
-				submenu: {
-					"genderMale": {
-						title: "Guys"
-					},
-					"genderFemale": {
-						title: "Gals"
-					},
-					"genderBoth": {
-						title: "Both"
-					}
-				}
-			},
-			"mood": {
-				id: "mood",
-				defaultMenuItem: "moodAll",
-				selected: null,
-				opened: false,
-				element: null,
-				submenu: {
-					"moodNeutral": {
-						title: "Neutral"
-					},
-					"moodSurprised": {
-						title: "Surprised"
-					},
-					"moodAngry": {
-						title: "Angry"
-					},
-					"moodSad": {
-						title: "Sad"
-					},
-					"moodHappy": {
-						title: "Happy"
-					},
-					"moodAll": {
-						title: "All Moods"
-					}
-				}
-			},
-			"location": {
-				id: "location",
-				element: null
-			},
-			"time": {
-				id: "time",
-				element: null
-			}
-		};
-		
-		this.element = $("#footer").get(0);
-		this.$footerMenu = $("#footerMenu");
-		
-		for (prop in this.menuItems) {
-			if (this.menuItems.hasOwnProperty(prop)) {
-				if (this.menuItems[prop].submenu) {
-					menuItemId = this.menuItems[prop].defaultMenuItem;
-				} else {
-					menuItemId = prop;
-				}
-				
-				menuItem = this.menuItems[prop];
-				
-				menuItem.icon = $('<div class="icon ' + menuItemId + '"></div>').get(0);
-				menuItem.element = $('<div class="footerMenuItem"></div>').get(0);
-				menuItem.element.appendChild(menuItem.icon);
-				
-				if (this.menuItems[prop].submenu) {
-					$(menuItem.element).addClass("drawable");
-					this.menuItems[prop].selected = menuItemId;
-					this.bindFooterMenuHandler(menuItem);
-				}
-				
-				this.$footerMenu.append(menuItem.element);
-			}
-		}
-	};
-	
-	Footer.prototype = {
-		constructor: Footer,
-		
-		bindFooterMenuHandler: function(menuItem) {
-			var self = this;
-			
-			$(menuItem.element).bindImmediateClick(function(event) {
-				var drawler;
-				
-				if (menuItem.opened) {
-					menuItem.drawler.hide();
-				} else {
-					drawler = new Drawler(self, menuItem);
-				}
-			});
-		}
-	};
-	
-	ns.Footer = Footer;
-	
+	/**
+	 * Page Constructor
+	 * 
+	 * Constructs page. The page won't be shown immediately but will be appended
+	 * to #pageWrapper with display:none property. To show the page invoke its
+	 * show() method.
+	 * 
+	 * Methods:
+	 * show()
+	 *     Show the page with choosen animation
+	 * addLeftHeaderButton(options)
+	 *     Add left header button. If you add custom left header button, provide
+	 *     another mean for going back.
+	 * addRightHeaderButton(options)
+	 *     Add right header button.
+	 * 
+	 * @param {Object} appView Instance of AppView
+	 * @param {Object} options Options for new page
+	 *   options (all options are optional):
+	 *     id {String} id attribute that will be assigned to page element. If
+	 *         another page element with the same id already exists, exception
+	 *         will be thrown.
+	 *     title {String} Title of the page. Will be shown at the top nav bar
+	 *         when the page is viewed.
+	 *     classAttr {String} class attributes separated by spaces that will be
+	 *         assigned to page element.
+	 *     pageParams {Object} parameters which will be passed to page init
+	 *         method when user invalidates and then goes back to this page.
+	 *     $element {jQuery} jQuery element that will be used for the page.
+	 *     animation {String} animation for page transition
+	 *         (default: "slideLeft")
+	 *     slideButton {Boolean} If false, header buttons won't be animated with
+	 *         default animation but only fade in and fade out.
+	 *         (default: true)
+	 *     backHeaderButtonLabel {String} Optional text for "Back" button, if
+	 *         not specified, previous page title will be used as button label.
+	 *         (default: null)
+	 */
 	Page = function(appView, options) {
 		
 		console.debug("Page(appView=", appView, ", options=", options, ")");
@@ -417,7 +203,6 @@ facetagram = window.facetagram || {};
 			$element: $('<div>' + ns.utils.loadingIndicatorDiv + '</div>'),
 			animation: "slideLeft",
 			slideButtons: true,
-			withFooter: true,
 			backHeaderButtonLabel: null
 		};
 		
@@ -427,7 +212,7 @@ facetagram = window.facetagram || {};
 		// Merge default options values, passed in options will override
 		if (options) {
 			for (prop in options) {
-				if (this.pageOptions[prop] !== undefined) {
+				if (options.hasOwnProperty(prop) && this.pageOptions[prop] !== undefined) {
 					this.pageOptions[prop] = options[prop];
 				}
 			}
@@ -460,6 +245,7 @@ facetagram = window.facetagram || {};
 			this.$element = this.pageOptions.$element;
 			this.$element.addClass("page");
 			this.$element.data("pageInstance", this);
+			this.element = this.$element.get(0);
 			
 			if (this.pageOptions.id) {
 				this.$element.attr("id", this.pageOptions.id);
@@ -470,7 +256,6 @@ facetagram = window.facetagram || {};
 			}
 			this.pageParams = this.pageOptions.pageParams;
 			this.animation = this.pageOptions.animation;
-			this.withFooter = this.pageOptions.withFooter;
 			this.backHeaderButtonLabel = this.pageOptions.backHeaderButtonLabel;
 			
 			// Check if page is in document tree by testing if it has a prant node.
@@ -487,15 +272,25 @@ facetagram = window.facetagram || {};
 		constructor: Page,
 		
 		init: function() {
-			
+			// Should be overriden by subclass
+		},
+		
+		refresh: function() {
+			this.appView.refreshIScroll(this.$element);
 		},
 		
 		addLeftHeaderButton: function(options) {
 			console.debug("Page.addLeftHeaderButton(options=", options, ")");
 			
 			var divElm,
-				options = options || {},
 				$leftHeaderButton;// = typeof leftHeaderButton === "string" ? $(leftHeaderButton) : leftHeaderButton;
+			
+			if (this.$leftHeaderButton) {
+				console.warn("Can't add left header button, button already exists!");
+				return false;
+			}
+			
+			options = options || {};
 			
 			function onLeftHeaderAnimationEnd(event) {
 				var leftHeaderButtonElm = $leftHeaderButton.get(0);
@@ -527,8 +322,14 @@ facetagram = window.facetagram || {};
 			console.debug("Page.addRightHeaderButton(options=", options, ")");
 			
 			var divElm,
-				options = options || {},
 				$rightHeaderButton;// = typeof rightHeaderButton === "string" ? $(rightHeaderButton) : rightHeaderButton;
+			
+			if (this.$rightHeaderButton) {
+				console.warn("Can't add left header button, button already exists!");
+				return false;
+			}
+			
+			options = options || {};
 			
 			function onRightHeaderAnimationEnd(event) {
 				var rightHeaderButtonElm = $rightHeaderButton.get(0);
@@ -597,8 +398,7 @@ facetagram = window.facetagram || {};
 				currentRightHeaderButtonElm = null,
 				animatedElements = [],
 				titleAnimationClass = "",
-				headerButtonAnimationClass = "",
-				footerAnimationClass = "";
+				headerButtonAnimationClass = "";
 			
 			this.appView.blockUI();
 			
@@ -652,21 +452,7 @@ facetagram = window.facetagram || {};
 					$oldRightHeaderButton.removeClass("slideLeftWide slideRightWide slideUp slideDown fade out go");
 				}
 				
-				if (!self.withFooter && oldPage.withFooter) {
-					self.appView.footer.element.style.top = "";
-					self.appView.footer.element.style.left = "";
-					self.appView.footer.element.style.position = "";
-					$(self.appView.footer.element).removeClass("slideLeft slideRight pop fade out go");
-					animatedElements.push(self.appView.footer.element);
-				} else if (self.withFooter && !oldPage.withFooter) {
-					self.appView.footer.element.style.top = "";
-					self.appView.footer.element.style.left = "";
-					self.appView.footer.element.style.position = "";
-					$(self.appView.footer.element).removeClass("slideLeft slideRight pop fade in go");
-					self.appView.$pageWrapper.height(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
-				}
-				
-				self.appView.refreshIScroll(self.$element);
+				self.refresh();
 				self.appView.unblockUI();
 				
 				self.$element.trigger("pageTransitionEnd");
@@ -731,7 +517,6 @@ facetagram = window.facetagram || {};
 						$oldPage.addClass("slideLeft out");
 						animatedElements = [pageElm, oldPageElm];
 						titleAnimationClass = "slideLeft";
-						footerAnimationClass = "slideLeft";
 						headerButtonAnimationClass = this.slideButtons ? "slideLeftWide" : '';
 						break;
 					case "slideRight":
@@ -740,7 +525,6 @@ facetagram = window.facetagram || {};
 						$oldPage.addClass("slideRight out");
 						animatedElements = [pageElm, oldPageElm];
 						titleAnimationClass = "slideRight";
-						footerAnimationClass = "slideRight";
 						headerButtonAnimationClass = this.slideButtons ? "slideRightWide" : '';
 						break;
 					case "popIn":
@@ -775,25 +559,6 @@ facetagram = window.facetagram || {};
 				if ($newRightHeaderButton) {
 					$newRightHeaderButton.addClass(headerButtonAnimationClass + " fade in");
 					animatedElements.push(newRightHeaderButtonElm);
-				}
-				
-				if (!this.withFooter && oldPage.withFooter) {
-					this.appView.footer.element.style.top = this.appView.footer.element.offsetTop + "px";
-					this.appView.footer.element.style.left = "0px";
-					this.appView.footer.element.style.position = "absolute";
-					this.appView.$pageWrapper.height(window.innerHeight - $("#header").outerHeight());
-					animatedElements.push(this.appView.footer.element);
-					if (footerAnimationClass) {
-						$(this.appView.footer.element).addClass(footerAnimationClass + " out");
-					}
-				} else if (this.withFooter && !oldPage.withFooter) {
-					this.appView.footer.element.style.top = (window.innerHeight - $("#footer").outerHeight()) + "px";
-					this.appView.footer.element.style.left = "0px";
-					this.appView.footer.element.style.position = "absolute";
-					animatedElements.push(this.appView.footer.element);
-					if (footerAnimationClass) {
-						$(this.appView.footer.element).addClass(footerAnimationClass + " in");
-					}
 				}
 				
 				pageElm.style.display = "block";
@@ -858,7 +623,7 @@ facetagram = window.facetagram || {};
 //				this.appView.setTitleWidth();
 				
 				this.$element.trigger("pageTransitionStart");
-				this.appView.refreshIScroll(this.$element);
+				this.refresh();
 				this.appView.unblockUI();
 				this.$element.trigger("pageTransitionEnd");
 			}
@@ -868,4 +633,4 @@ facetagram = window.facetagram || {};
 	
 	ns.Page = Page;
 	
-})(facetagram);
+}(facetagram));
