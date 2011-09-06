@@ -1,4 +1,3 @@
-var instagramApiKey = "8de4638ef797472989d88b1133f9203a";
 var faceApiKey = "a0df475a5d288710d95dbbd90e8a730a";
 var faceApiSecret = "5a5fa3c3a275f510ad36f683f0d3cddf";
 

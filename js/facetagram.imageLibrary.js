@@ -47,6 +47,12 @@ facetagram = window.facetagram || {};
 			
 			this.$scroller.append(this.$imageGallery);
 			this.$wrapper.append(this.$scroller);
+			
+			this.addLeftHeaderButton({
+				className: "instagramLogin"
+			}).bindImmediateClick(function(event) {
+				window.location = "https://instagram.com/oauth/authorize/?client_id=" + instagramApiKey + "&redirect_uri=" + window.location.href.replace(/#.*/, "") + "&response_type=token";
+			});
 		},
 		
 		appendImage: function(image) {
