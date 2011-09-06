@@ -24,7 +24,8 @@ facetagram.Image = function(instagram, face)
         hasGlasses: _hasGlasses,
         getThumbnail: _getThumbnail,
 		getLowResImage: _getLowResImage,
-        getImage: _getImage
+        getImage: _getImage,
+		getId: _getId
     };
 
     function _hasFace()
@@ -108,6 +109,11 @@ facetagram.Image = function(instagram, face)
     {
         return instagram.images.standard_resolution;
     };
+	
+	function _getId()
+	{
+		return instagram.id;
+	};
 }
 
 var InstagramApi = (function(apiKey){
@@ -265,6 +271,7 @@ facetagram.ImageRepository = (function(){
 //    ];
     
     var _images = [];
+	var _downloadedImages = {};
     var _listeners = [];
     var _initialized = false;
 
@@ -316,7 +323,22 @@ facetagram.ImageRepository = (function(){
             }
         });
     };
-
+	
+	function _addImages(images)
+	{
+		
+		for (var i=images.length-1 ; i>=0 ; i--)
+		{
+			var id = images[i].getId();
+			if (_downloadedImages[id])
+				images[i].splice(i,1);
+			else
+				_downloadedImages[id] = 1;
+		}
+		
+		_images = _images.concat(images);
+	};
+	
     function _makeRequest(index)
     {
         index = index || 0;
@@ -325,7 +347,7 @@ facetagram.ImageRepository = (function(){
             (function(index){
                     
                 facetagram.api.get(_locations[index], function(images){
-                    _images = _images.concat(images);
+                    _addImages(images);
                     _notify();
                     _makeRequest(++index);
                 });
