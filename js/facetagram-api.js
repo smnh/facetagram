@@ -110,7 +110,7 @@ facetagram.Image = function(instagram, face)
     };
 }
 
-var InstagramApi = (function(apiKey){
+var InstagramApi = (function(){
     
     var _location, 
         _minDistance = 500,
@@ -175,11 +175,15 @@ var InstagramApi = (function(apiKey){
     function _makeRequest(url, options, callback, scope)
     {
         options = options || {};
-        options['client_id'] = apiKey;
+        if (facetagram.settings.instagramAccessToken) {
+        	options['client_id'] = facetagram.settings.instagramAccessToken;
+        } else {
+        	options['access_token'] = facetagram.settings.instagramClientId;
+        }
         $.getJSON(url, options, function(data) {callback.call(scope, data);});
     }
     
-})("8de4638ef797472989d88b1133f9203a");
+})();
 
 
 FaceClientAPI.init(faceApiKey, faceApiSecret);

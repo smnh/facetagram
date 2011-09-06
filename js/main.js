@@ -5,8 +5,6 @@ if (facetagram.utils.isTouch && top != window) {
 	top.location.href = 'frame.html';
 }
 
-var instagramApiKey = "8de4638ef797472989d88b1133f9203a";
-
 $(function() {
 	
 	var accessToken = null;
@@ -22,7 +20,7 @@ $(function() {
 	
 	accessToken = window.location.href.match(/access_token=([^&]*)/);
 	if (accessToken) {
-		instagramApiKey = accessToken[1];
+		facetagram.settings.instagramAccessToken = accessToken[1];
 	}
 	
 	var view = new facetagram.AppView();
