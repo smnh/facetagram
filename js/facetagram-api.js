@@ -176,9 +176,9 @@ var InstagramApi = (function(){
     {
         options = options || {};
         if (facetagram.settings.instagramAccessToken) {
-        	options['client_id'] = facetagram.settings.instagramAccessToken;
+        	options['access_token'] = facetagram.settings.instagramAccessToken;
         } else {
-        	options['access_token'] = facetagram.settings.instagramClientId;
+        	options['client_id'] = facetagram.settings.instagramClientId;
         }
         $.getJSON(url, options, function(data) {callback.call(scope, data);});
     }
