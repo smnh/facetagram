@@ -272,11 +272,13 @@ facetagram = window.facetagram || {};
 				"mood": this.footer.menuItems.mood.defaultMenuItem
 			};
 			
-			this.addLeftHeaderButton({
-				className: "instagramLogin"
-			}).bindImmediateClick(function(event) {
-				window.location = "https://instagram.com/oauth/authorize/?client_id=" + ns.settings.instagramClientId + "&redirect_uri=" + encodeURIComponent(ns.settings.instagramCallbackUrl) + "&response_type=token";
-			});
+			if (!facetagram.settings.signedIntoInstagram) {
+				this.addLeftHeaderButton({
+					className: "instagramLogin"
+				}).bindImmediateClick(function(event) {
+					window.location = "https://instagram.com/oauth/authorize/?client_id=" + ns.settings.instagramClientId + "&redirect_uri=" + encodeURIComponent(ns.settings.instagramCallbackUrl) + "&response_type=token";
+				});
+			}
 		},
 		
 		// Overwriting default refresh method

@@ -21,6 +21,7 @@ $(function() {
 	accessToken = window.location.href.match(/access_token=([^&]*)/);
 	if (accessToken) {
 		facetagram.settings.instagramAccessToken = accessToken[1];
+		facetagram.settings.signedIntoInstagram = true;
 	}
 	
 	var view = new facetagram.AppView();

@@ -8,6 +8,7 @@ facetagram = window.facetagram || {};
 	ns.settings = {
 		instagramClientId: "8de4638ef797472989d88b1133f9203a",
 		instagramAccessToken: null,
+		signedIntoInstagram: false,
 		instagramCallbackUrl: "http://www.facesnaps.com/frame.html"
 	};
 	
