@@ -25,7 +25,7 @@ facetagram.Image = function(instagram, face)
         getThumbnail: _getThumbnail,
 		getLowResImage: _getLowResImage,
         getImage: _getImage,
-		getId: _getId
+		id: instagram.id
     };
 
     function _hasFace()
@@ -109,11 +109,6 @@ facetagram.Image = function(instagram, face)
     {
         return instagram.images.standard_resolution;
     };
-	
-	function _getId()
-	{
-		return instagram.id;
-	};
 }
 
 var InstagramApi = (function(apiKey){
@@ -329,7 +324,7 @@ facetagram.ImageRepository = (function(){
 		
 		for (var i=images.length-1 ; i>=0 ; i--)
 		{
-			var id = images[i].getId();
+			var id = images[i].id;
 			if (_downloadedImages[id])
 				images[i].splice(i,1);
 			else
