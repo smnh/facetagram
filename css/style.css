@@ -526,3 +526,30 @@ ul, li {
 .singleImageView .imageFilters .filter .icon.moodNeutral {width: 16px;}
 .singleImageView .imageFilters .filter .icon.location {width: 15px;}
 .singleImageView .imageFilters .filter .icon.time {width: 17px;}
+
+.dialogIFrame {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 101;
+	margin: 10px;
+	border: 10px solid rgba(0, 0, 0, 0.5);
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	background-color: #ffffff;
+	background-image: url(../images/activity-indicator-24x24.gif);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-clip: padding-box;
+}
+.dialogIFrameCloseButton {
+	position: absolute;
+	top: 7px;
+	right: 6px;
+	z-index: 102;
+	height: 28px;
+	width: 28px;
+	background-image: url(../images/close-icon.png);
+	background-position: center;
+	background-repeat: no-repeat;
+}

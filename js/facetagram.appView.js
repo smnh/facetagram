@@ -318,6 +318,18 @@ facetagram = window.facetagram || {};
 			return $leftHeaderButton;
 		},
 		
+		removeLeftHeaderButton: function() {
+			console.debug("Page.removeLeftHeaderButton()");
+			
+			if (!this.$leftHeaderButton) {
+				console.warn("Can't remove left header button, button doesn't exist!");
+				return false;
+			}
+			
+			this.$leftHeaderButton.remove();
+			this.$leftHeaderButton = null;
+		},
+		
 		addRightHeaderButton: function(options) {
 			console.debug("Page.addRightHeaderButton(options=", options, ")");
 			
@@ -355,6 +367,18 @@ facetagram = window.facetagram || {};
 				$rightHeaderButton.addClass("fade in");
 			}
 			return $rightHeaderButton;
+		},
+		
+		removeRightHeaderButton: function() {
+			console.debug("Page.removeRightHeaderButton()");
+			
+			if (!this.$rightHeaderButton) {
+				console.warn("Can't remove right header button, button doesn't exist!");
+				return false;
+			}
+			
+			this.$rightHeaderButton.remove();
+			this.$rightHeaderButton = null;
 		},
 		
 		destroy: function() {

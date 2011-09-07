@@ -1,0 +1,16 @@
+<html>
+	<head>
+		<script type="text/javascript">
+			var accessToken = window.location.href.match(/access_token=([^&]*)/);
+			
+			document.domain = "facesnaps.com";
+			
+			if (accessToken) {
+				window.parent.closeDialogIFrame(accessToken[1]);
+			} else {
+				window.parent.closeDialogIFrame(null);
+			}
+		</script>
+	</head>
+	<body></body>
+</html>

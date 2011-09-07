@@ -255,6 +255,8 @@ facetagram = window.facetagram || {};
 	ns.utils.inheritPrototype(ImageLibraryPage, ns.Page, {
 		
 		init: function() {
+			self = this;
+			
 			this.lastImageIndex = 0;
 			this.loading = true;
 			
@@ -272,11 +274,47 @@ facetagram = window.facetagram || {};
 				"mood": this.footer.menuItems.mood.defaultMenuItem
 			};
 			
-			if (!facetagram.settings.signedIntoInstagram) {
+			if (!ns.settings.signedIntoInstagram) {
 				this.addLeftHeaderButton({
 					className: "instagramLogin"
 				}).bindImmediateClick(function(event) {
-					window.location = "https://instagram.com/oauth/authorize/?display=touch&client_id=" + ns.settings.instagramClientId + "&redirect_uri=" + encodeURIComponent(ns.settings.instagramCallbackUrl) + "&response_type=token";
+					var dialogIframeElm,
+						closeButtonElm,
+						authUrl = "https://instagram.com/oauth/authorize/?display=touch&client_id=" + ns.settings.instagramClientId + "&redirect_uri=" + encodeURIComponent(ns.settings.instagramCallbackUrl) + "&response_type=token";
+					
+					dialogIframeElm = document.createElement("iframe");
+					dialogIframeElm.className = "dialogIFrame";
+					$(dialogIframeElm).css({
+						width: (window.innerWidth - 40) + "px",
+						height: (window.innerHeight - 40) + "px"
+					});
+					dialogIframeElm.src = authUrl;
+					
+					closeButtonElm = document.createElement("div");
+					closeButtonElm.className = "dialogIFrameCloseButton";
+					
+					$(closeButtonElm).bindImmediateClick(function(event) {
+						window.closeDialogIFrame(null);
+					});
+					
+					document.domain = "facesnaps.com";
+					
+					window.closeDialogIFrame = function(accessToken) {
+						console.debug("closeDialogIFrame(accessToken=", accessToken, ")");
+						if (accessToken) {
+							ns.settings.instagramAccessToken = accessToken;
+							ns.settings.signedIntoInstagram = true;
+							self.removeLeftHeaderButton();
+						}
+						delete window.closeDialogIFrame;
+						$(dialogIframeElm).remove();
+						$(closeButtonElm).remove();
+						self.appView.unblockUI();
+					}
+					
+					self.appView.blockUI();
+					$("body").append(dialogIframeElm);
+					$("body").append(closeButtonElm);
 				});
 			}
 		},
