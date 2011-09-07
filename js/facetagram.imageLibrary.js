@@ -276,7 +276,7 @@ facetagram = window.facetagram || {};
 				this.addLeftHeaderButton({
 					className: "instagramLogin"
 				}).bindImmediateClick(function(event) {
-					window.location = "https://instagram.com/oauth/authorize/?client_id=" + ns.settings.instagramClientId + "&redirect_uri=" + encodeURIComponent(ns.settings.instagramCallbackUrl) + "&response_type=token";
+					window.location = "https://instagram.com/oauth/authorize/?display=touch&client_id=" + ns.settings.instagramClientId + "&redirect_uri=" + encodeURIComponent(ns.settings.instagramCallbackUrl) + "&response_type=token";
 				});
 			}
 		},
