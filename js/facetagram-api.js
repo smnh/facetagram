@@ -183,7 +183,7 @@ var InstagramApi = (function(){
 })();
 
 
-FaceClientAPI.init(facetagram.settings.faceApiKey, facetagram.settints.faceApiSecret);
+FaceClientAPI.init(facetagram.settings.faceApiKey, facetagram.settings.faceApiSecret);
 
 facetagram.api = (function(){
     
