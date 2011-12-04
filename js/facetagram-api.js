@@ -1,6 +1,3 @@
-var faceApiKey = "a0df475a5d288710d95dbbd90e8a730a";
-var faceApiSecret = "5a5fa3c3a275f510ad36f683f0d3cddf";
-
 facetagram = window.facetagram || {};
 
 facetagram.Image = function(instagram, face)
@@ -108,7 +105,7 @@ facetagram.Image = function(instagram, face)
     {
         return instagram.images.standard_resolution;
     };
-}
+};
 
 var InstagramApi = (function(){
     
@@ -186,7 +183,7 @@ var InstagramApi = (function(){
 })();
 
 
-FaceClientAPI.init(faceApiKey, faceApiSecret);
+FaceClientAPI.init(facetagram.settings.faceApiKey, facetagram.settints.faceApiSecret);
 
 facetagram.api = (function(){
     
@@ -213,7 +210,7 @@ facetagram.api = (function(){
                 map[images[i].images.standard_resolution.url] = images[i];
             }
             
-            _makeFaceRequest(urls, map, _callback, _scope)
+            _makeFaceRequest(urls, map, _callback, _scope);
             return;
 
             function _makeFaceRequest(urls, map, callback, scope)
@@ -272,9 +269,26 @@ facetagram.ImageRepository = (function(){
 	var _downloadedImages = {};
     var _listeners = [];
     var _initialized = false;
-
-    _startPolling();
-
+	var _storedImages = null;
+	
+	// Check if we are in develop mode, in which case try to load images from
+	// localStorage to bypass loading them from servers.
+	if (facetagram.settings.devel) {
+		_storedImages = localStorage.getItem('images');
+	}
+	
+	if (_storedImages) {
+		_images = JSON.parse(_storedImages);
+		for (var i = 0; i < _images.length; i++) {
+			_images[i] = new facetagram.Image(_images[i].data.instagram, _images[i].data.face);
+		}
+		window.setTimeout(function() {
+			_notify();
+		}, 1000);
+	} else {
+		_startPolling();
+	}
+	
     return {
         
         getImages: _getImages,
@@ -329,12 +343,18 @@ facetagram.ImageRepository = (function(){
 		{
 			var id = images[i].id;
 			if (_downloadedImages[id])
-				images[i].splice(i,1);
+				images.splice(i,1);
 			else
 				_downloadedImages[id] = 1;
 		}
 		
 		_images = _images.concat(images);
+		
+		// Check if we are in develop mode, in which case save images to
+		// localStorage to load them from it on next refresh.
+		if (facetagram.settings.devel) {
+			localStorage.setItem("images", JSON.stringify(_images));
+		}
 	};
 	
     function _makeRequest(index)

@@ -30,6 +30,12 @@ facetagram = window.facetagram || {};
 			return -1 !== $.inArray(value, array);
 		},
 		
+		emptyElement: function(element) {
+			while (element.firstChild) {
+				element.removeChild(element.firstChild);
+			}
+		},
+		
 		/**
 		 * Prototypal Inheritance
 		 * http://javascript.crockford.com/prototypal.html
@@ -81,13 +87,14 @@ facetagram = window.facetagram || {};
 			// create object with prototype pointing to super's prototype
 			prototype = ns.utils.object(superType.prototype);
 			prototype.constructor = subType;
-			subType.prototype = prototype;
 			
 			for (methodName in subMethods) {
 				if (subMethods.hasOwnProperty(methodName)) {
-					subType.prototype[methodName] = subMethods[methodName];
+					prototype[methodName] = subMethods[methodName];
 				}
 			}
+			
+			subType.prototype = prototype;
 		}
 	};
 	

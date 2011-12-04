@@ -310,7 +310,7 @@ facetagram = window.facetagram || {};
 						$(dialogIframeElm).remove();
 						$(closeButtonElm).remove();
 						self.appView.unblockUI();
-					}
+					};
 					
 					self.appView.blockUI();
 					$("body").append(dialogIframeElm);
@@ -322,17 +322,17 @@ facetagram = window.facetagram || {};
 		// Overwriting default refresh method
 		refresh: function(event) {
 			this.$wrapper.height(window.innerHeight - $("#header").outerHeight() - $(this.footer.element).outerHeight());
-			this.appView.refreshIScroll(this.$element);
+			this.refreshIScroll();
 		},
 		
-		appendImage: function(image) {
+		appendImage: function(image, index) {
 			var self = this, thumbnailData, $imageWrapper;
 			
 		    thumbnailData = image.getThumbnail();
 		    $imageWrapper = $('<div class="imageWrapper"><img src="' + thumbnailData.url + '" /></div>');
 		    
 		    $imageWrapper.bindImmediateClick(function(event) {
-				var singleImageView = new SingleImagePage(image, self);
+				var singleImageView = new SingleImagePage(image, index, self.appView);
 		    });
 		    
 		    this.$imageGallery.append($imageWrapper);
@@ -350,11 +350,11 @@ facetagram = window.facetagram || {};
 			if (images && images.length) {
 				for (i = this.lastImageIndex; i < images.length; i++) {
                     if (this.filterImage(images[i])) {
-						this.appendImage(images[i]);
+						this.appendImage(images[i], i);
                     }
 				}
 				
-				this.appView.refreshIScroll(this.$element);
+				this.refreshIScroll();
 			}
 		},
 		
@@ -377,11 +377,11 @@ facetagram = window.facetagram || {};
 			
 			for (i = 0; i < images.length; i++) {
                 if (this.filterImage(images[i])) {
-				    this.appendImage(images[i]);
+				    this.appendImage(images[i], i);
                 }
 			}
 			
-			this.appView.refreshIScroll(this.$element);
+			this.refreshIScroll();
 			this.lastImageIndex = images.length;
 		},
 		
@@ -425,28 +425,62 @@ facetagram = window.facetagram || {};
 	/**
 	 * SingleImagePage - Inherits from Page
 	 */
-	SingleImagePage = function(image, imageLibrary) {
+	SingleImagePage = function(image, index, appView) {
 		
-		ns.Page.call(this, imageLibrary.appView, {
+		ns.Page.call(this, appView, {
 			classAttr: 'singleImageView',
 			withFooter: false,
 			slideButtons: false
 		});
 		
-		this.init(image);
+		this.init(image, index);
 		this.show();
 	};
 	
 	ns.utils.inheritPrototype(SingleImagePage, ns.Page, {
 		
-		init: function(image) {
-			console.debug("SingleImagePage.init(image=", image, ")");
+		init: function(image, index) {
+			console.debug("SingleImagePage.init(image=", image, ", index=", index, ")");
+			
+			var self = this;
+			
+			this.$element.one("pageTransitionEnd", function(event) {
+				var snapperWrapperElm = document.createElement("div");
+				
+				snapperWrapperElm.className = "snapper";
+				
+				self.$element.empty();
+				self.$element.append(snapperWrapperElm);
+				
+				self.snapper = new Snapper(snapperWrapperElm, {
+					initPageIndex: index,
+					mode: Snapper.modes.CALLBACKS,
+					generatePage: function() { self.generateImagePage.apply(self, arguments); },
+					onPageAnimationEnd: function() { self.loadImagePage.apply(self, arguments); },
+					hasPageIndex: function(index) {
+						return 0 <= index && index < ns.ImageRepository.getImages().length;
+					}
+				});
+				self.snapper.start();
+			});
+		},
+		
+		destroy: function() {
+			this.snapper.destroy();
+			ns.Page.prototype.destroy.apply(this);
+		},
+		
+		generateImagePage: function(index, pageElement) {
+			console.debug("generateImagePage.loadImagePage(index="+ index + ")");
 			
 			var self = this,
+				images = ns.ImageRepository.getImages(),
+				image = images[index],
 				caption = image.data.instagram.caption && image.data.instagram.caption.text ? image.data.instagram.caption.text : '',
 				location = image.data.instagram.location && image.data.instagram.location.name ? image.data.instagram.location.name : '',
 				groupClass, genderClass, moodClass,
-				filtersHtml = '';
+				filtersHtml = '',
+				$content;
 			
 			if (image.hasGroup()) {
 				groupClass = "groupMany";
@@ -479,11 +513,10 @@ facetagram = window.facetagram || {};
 			}
 			filtersHtml += '<div class="filter"><div class="icon ' + moodClass + '"></div></div>';
 			
-			self.$element.empty();
-			self.$element.append(
+			$content = $(
 				'<div class="wrapper">' +
 					'<div class="scroller">' +
-						'<div class="imageWrapper">' + ns.utils.loadingIndicatorDiv + '</div>' +
+						'<div class="imageWrapper"></div>' +
 						(caption ? '<div class="imageTitle">' + caption + '</div>' : '') +
 						(location ? '<div class="location">Taken at: ' + location + '</div>' : '') +
 						'<div class="imageFilters">' + filtersHtml + '</div>' +
@@ -491,24 +524,36 @@ facetagram = window.facetagram || {};
 				'</div>'
 			);
 			
-			this.$element.one("pageTransitionEnd", function(event) {
-				var _image = new Image();
-				
-				_image.onload = function(event) {
-					this.removeEventListener('load');
-					// In case user clicks back and destorys the page before
-					// image has been loaded.
-					if (self.destroyed) {
-						return;
-					}
-					self.$element.find('.imageWrapper')
-						.empty()
-						.append('<img src="' + _image.src + '" alt="' + caption + '" />');
-				};
-				
-				_image.src = image.getLowResImage().url;
-			});
+			$(pageElement).append($content);
 			
+			console.debug("content ready, getPageElement(index="+ index + ")...");
+			this.snapper.getPageElement(index, function(pageElement) {
+				self.refreshIScroll(pageElement);
+			});
+
+		},
+		
+		loadImagePage: function(index) {
+			console.debug("SingleImagePage.loadImagePage(index="+ index + ")");
+			
+			var self = this,
+				images = ns.ImageRepository.getImages(),
+				image = images[index],
+				caption = image.data.instagram.caption && image.data.instagram.caption.text ? image.data.instagram.caption.text : '',
+				_image;
+			
+			_image = new Image();
+			_image.onload = function(event) {
+				// In case user clicks back and destorys the page before image has been loaded.
+				if (self.destroyed) {
+					return;
+				}
+				console.debug("image loaded, getPageElement(index="+ index + ")...");
+				self.snapper.getPageElement(index, function(pageElement) {
+					$(pageElement).find(".imageWrapper").append('<img src="' + _image.src + '" alt="' + caption + '" />');
+				});
+			};
+			_image.src = image.getLowResImage().url;
 		}
 		
 	});

@@ -110,42 +110,6 @@ facetagram = window.facetagram || {};
 				page.show();
 				page.invalidated = false;
 			}
-		},
-		
-		refreshIScroll: function($element) {
-			var $scroller = $element.find(".scroller"),
-				$wrapper,
-				wrapperHeight,
-				scrollerMinHeight,
-				iscroll;
-			
-			if ($scroller.length) {
-				// Calculate scroller min-height
-				$wrapper = $scroller.parent(".wrapper");
-				wrapperHeight = $wrapper.height();
-				scrollerMinHeight = wrapperHeight;
-				$scroller.css("min-height", scrollerMinHeight + "px");
-				
-				// Check if iScroll already initiated on current scroller element
-				if (!$scroller.data("iscroll")) {
-					iscroll = new iScroll($wrapper.get(0), {
-						"desktopCompatibility": true,
-						"checkDOMChanges": false
-					});
-					$scroller.get(0).immediateClickIScroll = iscroll;
-					$scroller.data("iscroll", iscroll);
-				} else {
-					window.setTimeout(function () {
-						$scroller.data("iscroll").refresh();
-					}, 0);
-				}
-				// Prevent iScroll from catching START_EVENT on input and select
-				// and preventing it's default action of focusing (needed only for
-				// desktop mode).
-				$scroller.find("input, select, textarea").bind(ns.utils.START_EVENT, function(event) {
-					event.stopPropagation();
-				});
-			}
 		}
 	};
 	
@@ -275,8 +239,43 @@ facetagram = window.facetagram || {};
 			// Should be overriden by subclass
 		},
 		
+		refreshIScroll: function(element) {
+			var $scroller = (element && $(element) || this.$element).find(".scroller"),
+				$wrapper,
+				wrapperHeight,
+				scrollerMinHeight,
+				iscroll;
+			
+			if ($scroller.length) {
+				// Calculate scroller min-height
+				$wrapper = $scroller.parent(".wrapper");
+				wrapperHeight = $wrapper.height();
+				scrollerMinHeight = wrapperHeight;
+				$scroller.css("min-height", scrollerMinHeight + "px");
+				
+				// Check if iScroll already initiated on current scroller element
+				if (!$scroller.data("iscroll")) {
+					iscroll = new iScroll($wrapper.get(0), {
+						"checkDOMChanges": false
+					});
+					$scroller.get(0).immediateClickIScroll = iscroll;
+					$scroller.data("iscroll", iscroll);
+				} else {
+					window.setTimeout(function () {
+						$scroller.data("iscroll").refresh();
+					}, 0);
+				}
+				// Prevent iScroll from catching START_EVENT on input and select
+				// and preventing it's default action of focusing (needed only for
+				// desktop mode).
+				$scroller.find("input, select, textarea").bind(ns.utils.START_EVENT, function(event) {
+					event.stopPropagation();
+				});
+			}
+		},
+		
 		refresh: function() {
-			this.appView.refreshIScroll(this.$element);
+			this.refreshIScroll();
 		},
 		
 		addLeftHeaderButton: function(options) {
